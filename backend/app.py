@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, Blueprint
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from models.User import User
 from database import db
+from routes.maker_taker_card_game_routes import maker_taker_card_game_routes
 
 load_dotenv()
 app = Flask(__name__)
@@ -33,7 +34,7 @@ def signup():
     new_user = User(user_id=user_id, email=data['email'], password=hashed_password)
     new_user.save()
     session['user_id'] = user_id
-    return jsonify({'message': 'User created successfully'})
+    return jsonify({'message': 'User created successfully', 'userId': user_id})
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -41,7 +42,7 @@ def login():
     user = User.objects.get(email=data['email'])
     if user and bcrypt.check_password_hash(user.password, data['password']):
         session['user_id'] = user.user_id
-        return jsonify({'message': 'Login successful'})
+        return jsonify({'message': 'Login successful', 'userId': user.user_id})
     else:
         return jsonify({'error': 'Invalid email or password'}), 401
 
@@ -50,6 +51,8 @@ def logout():
     # Remove user_id from session to log out the user
     session.pop('user_id', None)
     return jsonify({'message': 'Logout successful'})
+
+app.register_blueprint(maker_taker_card_game_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)

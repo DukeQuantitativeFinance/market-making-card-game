@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import { UserContext } from '../UserContext';
 
 const AuthPage = () => {
+  const { userId, updateUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const AuthPage = () => {
     .then(response => {
       console.log('Response:', response.data);
       // Handle successful response
-      console.log("navigate to lobby");
+      updateUser(response.data.userId);
       navigate('/lobby');
     })
     .catch(error => {
@@ -39,6 +40,8 @@ const AuthPage = () => {
     .then(response => {
       console.log('Response:', response.data);
       // Handle successful response
+      updateUser(response.data.userId);
+      navigate('/lobby');
     })
     .catch(error => {
       console.error('Error:', error.response.data);
