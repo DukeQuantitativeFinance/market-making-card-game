@@ -3,7 +3,9 @@ from mongoengine import connect
 from dotenv import load_dotenv
 import os
 from uuid import uuid4
+
 from models.User import User
+from routes.market_making_card_game_routes import market_making_card_game_routes
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -58,6 +60,8 @@ def homepage():
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
+app.register_blueprint(market_making_card_game_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)
