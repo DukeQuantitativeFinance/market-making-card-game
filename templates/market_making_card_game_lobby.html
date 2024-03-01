@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby</title>
+</head>
+<body>
+    <h2>Lobby</h2>
+    <ul>
+        {% for game in games %}
+            <li>{{ game.name }} - Created by: {{ game.created_by }} <a href="#" onclick="joinGame('{{ game.game_id }}')">Join</a></li>
+        {% endfor %}
+    </ul>
+</body>
+
+<script>
+    function joinGame(gameId) {
+        // Make AJAX request to join game
+        // Example using jQuery:
+        $.post("/join_game", { game_id: gameId }, function(data, status) {
+            // Handle response
+            if (status === "success") {
+                alert("Joined game successfully!");
+                // Redirect to game page or update UI as needed
+            } else {
+                alert("Failed to join game.");
+            }
+        });
+    }
+</script>
+</html>
