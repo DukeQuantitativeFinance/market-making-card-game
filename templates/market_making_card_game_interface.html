@@ -9,10 +9,7 @@
     <h2>{{ game.name }}</h2>
     <p>Created by: {{ game.created_by }}</p>
     <h3>Players:</h3>
-    <ul>
-      {% for player in players %}
-      <li>{{ player }}</li>
-      {% endfor %}
+    <ul id="players-list">
     </ul>
 
     {% if is_creator %}
@@ -25,4 +22,113 @@
       <button type="submit">Leave Game</button>
     </form>
   </body>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // check if the current user is the creator of the game
+      const isCreator = "{{ is_creator }}" === "True";
+
+      // function to fetch game updates from the backend and update HTML
+      function fetchAndRenderGameUpdates() {
+        fetch(`/market-making-card-game/game/{{ game.game_id }}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.players) {
+              // handle game updates and update HTML
+              updatePlayerList(data.players);
+            } else {
+              alert("Failed to get game updates.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching game updates:", error);
+          });
+      }
+
+      // initial fetch and render
+      fetchAndRenderGameUpdates();
+
+      // poll for game updates every 5 seconds
+      setInterval(fetchAndRenderGameUpdates, 5000);
+
+      // update the player list in the HTML
+      function updatePlayerList(players) {
+        const playersList = document.getElementById("players-list");
+
+        // clear existing list
+        playersList.innerHTML = "";
+
+        // populate list with updated player information
+        players.forEach((player) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = player;
+          playersList.appendChild(listItem);
+        });
+      }
+
+      if (isCreator) {
+        document
+          .getElementById("start-game-btn")
+          .addEventListener("click", function () {
+            startGame();
+          });
+        document
+          .getElementById("advance-round-btn")
+          .addEventListener("click", function () {
+            advanceRound();
+          });
+      }
+
+      // start the game
+      function startGame() {
+        fetch("/start_game", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ game_id: "{{ game.game_id }}" }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Game started successfully!");
+            } else {
+              alert("Failed to start game.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while starting the game.");
+          });
+      }
+
+      // advance to the next round
+      function advanceRound() {
+        fetch("/advance_round", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ game_id: "{{ game.game_id }}" }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Round advanced successfully!");
+            } else {
+              alert("Failed to advance round.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred while advancing round.");
+          });
+      }
+    });
+  </script>
 </html>

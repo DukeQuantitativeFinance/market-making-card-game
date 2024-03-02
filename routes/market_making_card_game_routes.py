@@ -72,22 +72,63 @@ def create_game():
 
 @market_making_card_game_routes.route('/market-making-card-game/game/<game_id>')
 def game_interface(game_id):
-    # Retrieve game details and list of players from the database
-    game = active_games[game_id]
-    players = game.players
-    
-    is_creator = False
-    if 'username' in session and session['username'] == game.created_by:
-        is_creator = True
+    try:
+        # retrieve game details and list of players
+        game = active_games[game_id]
+        players = game.players
+        
+        is_creator = False
+        if 'username' in session and session['username'] == game.created_by:
+            is_creator = True
 
-    return render_template('market_making_card_game_interface.html', game=game, players=players, is_creator=is_creator)
+        return render_template('market_making_card_game_interface.html', game=game, players=players, is_creator=is_creator)
+    except:
+        return redirect('/market-making-card-game/lobby')
+
+@market_making_card_game_routes.route('/market-making-card-game/game/<game_id>', methods=['POST'])
+def get_game_updates(game_id):
+    if game_id in active_games:
+        game = active_games[game_id]
+        game_data = {
+            'game_id': str(game.game_id),
+            'name': game.name,
+            'created_by': game.created_by,
+            'players': game.players
+        }
+        return jsonify(game_data)
+    else:
+        return jsonify({'error': 'Game not found'})
+
+@market_making_card_game_routes.route('/market-making-card-game/start_game', methods=['POST'])
+def start_game():
+    # Check if the user is the creator of the game
+    # Implement logic to start the game (e.g., update game status)
+    return jsonify({'success': True})
+
+@market_making_card_game_routes.route('/market-making-card-game/advance_round', methods=['POST'])
+def advance_round():
+    # Check if the user is the creator of the game
+    # Implement logic to advance to the next round (e.g., update round status)
+    return jsonify({'success': True})
 
 @market_making_card_game_routes.route('/leave_game', methods=['POST'])
 def leave_game():
     game_id = request.form.get('game_id')
-    # Add logic to remove the current user from the game (e.g., update database)
-    # Example:
-    # game = Game.objects.get(game_id=game_id)
-    # game.players.remove(current_user)
-    # game.save()
-    return redirect('/market-making-card-game/lobby')  # Redirect to lobby page after leaving game
+    # remove current user from game in the database
+    try:
+        game = Game.objects.get(game_id=game_id)
+        current_user = session['username']
+        game.players.remove(current_user)
+        game.save()
+    except:
+        print(f'Game {game_id} not found in database')
+        
+    # remove user from game in current active games
+    try:
+        game = active_games[game_id]
+        current_user = session['username']
+        game.players.remove(current_user)
+    except:
+        print(f'Game {game_id} not found in current active games')
+        
+    return redirect('/market-making-card-game/lobby')  # redirect to lobby after leaving game
