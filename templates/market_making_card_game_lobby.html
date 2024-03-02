@@ -22,17 +22,26 @@
 
   <script>
     function joinGame(gameId) {
-      // Make AJAX request to join game
-      // Example using jQuery:
-      $.post("/join_game", { game_id: gameId }, function (data, status) {
-        // Handle response
-        if (status === "success") {
-          alert("Joined game successfully!");
-          // Redirect to game page or update UI as needed
-        } else {
-          alert("Failed to join game.");
-        }
-      });
+      fetch("/market-making-card-game/join-game", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ game_id: gameId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Joined game successfully!");
+            window.location.href = `/market-making-card-game/game/${gameId}`;
+          } else {
+            alert("Failed to join game.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("An error occurred while joining the game.");
+        });
     }
   </script>
 
@@ -52,8 +61,17 @@
             gamesList.innerHTML = ""; // Clear previous list
             data.forEach((game) => {
               const listItem = document.createElement("li");
-              listItem.textContent =
-                game.name + " - Created by: " + game.created_by;
+              listItem.textContent = game.name + " - Created by: " + game.created_by + ` (${game.player_count} players)`;
+
+              // add a button to join the game
+              const joinButton = document.createElement("button");
+              joinButton.textContent = "Join";
+              joinButton.addEventListener("click", function () {
+                  joinGame(game.game_id);
+              });
+
+              listItem.appendChild(joinButton);
+
               gamesList.appendChild(listItem);
             });
           })

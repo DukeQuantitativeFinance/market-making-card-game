@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ game.name }} - Game Interface</title>
+  </head>
+  <body>
+    <h2>{{ game.name }}</h2>
+    <p>Created by: {{ game.created_by }}</p>
+    <h3>Players:</h3>
+    <ul>
+      {% for player in players %}
+      <li>{{ player }}</li>
+      {% endfor %}
+    </ul>
+
+    {% if is_creator %}
+    <button id="start-game-btn">Start Game</button>
+    <button id="advance-round-btn">Advance to Next Round</button>
+    {% endif %}
+
+    <form action="/leave_game" method="post">
+      <input type="hidden" name="game_id" value="{{ game.game_id }}" />
+      <button type="submit">Leave Game</button>
+    </form>
+  </body>
+</html>
